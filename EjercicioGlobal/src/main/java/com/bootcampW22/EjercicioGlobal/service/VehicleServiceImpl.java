@@ -22,10 +22,10 @@ public class VehicleServiceImpl implements IVehicleService {
     }
 
     @Override
-    public VehicleDto saveVehicle(Vehicle vehicle) {
+    public VehicleDto save(Vehicle vehicle) {
 //        validateVehicle(vehicle);
 
-        Vehicle response = vehicleRepository.saveVehicle(vehicle);
+        Vehicle response = vehicleRepository.save(vehicle);
 
         return convertVehicleToDto(response);
     }
@@ -43,6 +43,80 @@ public class VehicleServiceImpl implements IVehicleService {
     }
 
     @Override
+    public List<VehicleDto> findByColorAndYear(String color, Integer year) {
+        List<Vehicle> vehicleList = vehicleRepository.findByColorAndYear(color, year);
+
+        if (vehicleList.isEmpty()) {
+            throw new NotFoundException("No se encontró ningun auto en el sistema.");
+        }
+
+        return vehicleList.stream()
+                .map(vehicle -> convertVehicleToDto(vehicle))
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public String findByAverageSpeed(String brand) {
+        List<Vehicle> vehicleList = vehicleRepository.findByBrand(brand);
+
+        if (vehicleList.isEmpty()) {
+            throw new NotFoundException("No se encontró ningun auto en el sistema.");
+        }
+
+        double averageSpeed = vehicleList.stream()
+                .map(vehicle -> convertVehicleToDto(vehicle))
+                .map(speed -> Double.parseDouble(speed.max_speed()))
+                .mapToDouble(speed -> speed)
+                .average()
+                .orElse(0.0);
+
+        return "A velocidade média é " + averageSpeed;
+    }
+
+    @Override
+    public List<VehicleDto> findByFuelType(String type) {
+        List<Vehicle> vehicleList = vehicleRepository.findByFuelType(type);
+
+        if (vehicleList.isEmpty()) {
+            throw new NotFoundException("No se encontró ningun auto en el sistema.");
+        }
+
+        return vehicleList.stream()
+                .map(vehicle -> convertVehicleToDto(vehicle))
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<VehicleDto> findByTransmission(String transmission) {
+        List<Vehicle> vehicleList = vehicleRepository.findByTransmission(transmission);
+
+        if (vehicleList.isEmpty()) {
+            throw new NotFoundException("No se encontró ningun auto en el sistema.");
+        }
+
+        return vehicleList.stream()
+                .map(vehicle -> convertVehicleToDto(vehicle))
+                .collect(Collectors.toList());
+    }
+
+    public String findByAverageCapacity(String brand){
+        List<Vehicle> vehicleList = vehicleRepository.findByBrand(brand);
+
+        if (vehicleList.isEmpty()) {
+            throw new NotFoundException("No se encontró ningun auto en el sistema.");
+        }
+
+        Double averageCapacity = vehicleList.stream()
+                .map(vehicle -> convertVehicleToDto(vehicle))
+                .map(capacity -> capacity.passengers().doubleValue())
+                .mapToDouble(capacity -> capacity)
+                .average()
+                .orElse(0.0);
+
+        return "A capacidade média de pessoas nos veículos da marca " + brand + " é: " + averageCapacity;
+    }
+
+    @Override
     public void delete(Long id) {
         vehicleRepository.delete(id);
     }
@@ -50,6 +124,7 @@ public class VehicleServiceImpl implements IVehicleService {
     @Override
     public List<VehicleDto> searchAllVehicles() {
         List<Vehicle> vehicleList = vehicleRepository.findAll();
+
         if (vehicleList.isEmpty()) {
             throw new NotFoundException("No se encontró ningun auto en el sistema.");
         }
@@ -58,8 +133,6 @@ public class VehicleServiceImpl implements IVehicleService {
                 .map(this::convertVehicleToDto)
                 .collect(Collectors.toList());
     }
-
-
 
     private VehicleDto convertVehicleToDto(Vehicle v) {
         return new VehicleDto(

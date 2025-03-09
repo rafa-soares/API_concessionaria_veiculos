@@ -22,7 +22,7 @@ public class VehicleRepositoryImpl implements IVehicleRepository {
     }
 
     @Override
-    public Vehicle saveVehicle(Vehicle vehicle) {
+    public Vehicle save(Vehicle vehicle) {
         listOfVehicles.add(vehicle);
         saveToJson();
         return vehicle;
@@ -44,8 +44,8 @@ public class VehicleRepositoryImpl implements IVehicleRepository {
     @Override
     public List<Vehicle> findByBrandAndPeriod(String brand, Integer start, Integer end) {
         return listOfVehicles.stream()
-                .filter((vehicle) -> {
-                    Boolean resultBrand = brand.equals(vehicle.getBrand());
+                .filter(vehicle -> {
+                    Boolean resultBrand = brand.equalsIgnoreCase(vehicle.getBrand());
 
                     Integer year = vehicle.getYear(); // Obtendo o ano do veículo
                     Boolean resultPeriod = year >= start && year <= end; // Verificando se está entre o intervalo
@@ -56,10 +56,42 @@ public class VehicleRepositoryImpl implements IVehicleRepository {
     }
 
     @Override
+    public List<Vehicle> findByColorAndYear(String color, Integer year) {
+        return listOfVehicles.stream()
+                .filter(vehicle -> {
+                    Boolean resultColor = color.equalsIgnoreCase(vehicle.getColor());
+                    Boolean resultYear = year.equals(vehicle.getYear());
+
+                    return resultColor && resultYear;
+                })
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<Vehicle> findByBrand(String brand) {
+        return listOfVehicles.stream()
+                .filter(vehicle -> brand.equalsIgnoreCase(vehicle.getBrand()))
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<Vehicle> findByFuelType(String type) {
+        return listOfVehicles.stream()
+                .filter(vehicle -> type.equalsIgnoreCase(vehicle.getFuel_type()))
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<Vehicle> findByTransmission(String transmission) {
+        return listOfVehicles.stream()
+                .filter(vehicle -> transmission.equalsIgnoreCase(vehicle.getTransmission()))
+                .collect(Collectors.toList());
+    }
+
+    @Override
     public void delete(Long id) {
         listOfVehicles.removeIf(vehicle -> id.equals(vehicle.getId()));
     }
-
 
     private void loadDataBase() throws IOException {
         File file;
